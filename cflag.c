@@ -184,6 +184,8 @@ cflag_status_name(CFlagStatus value)
         case CFLAG_BAD_FORMAT: return "argument has invalid format";
         case CFLAG_NEEDS_ARG: return "missing argument";
     }
+    assert(!"Unreachable");
+    abort();
 }
 
 const char*
