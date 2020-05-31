@@ -54,6 +54,7 @@ struct _CFlag {
 
 CFlagStatus cflag_bool   (const CFlag*, const char*);
 CFlagStatus cflag_int    (const CFlag*, const char*);
+CFlagStatus cflag_uint   (const CFlag*, const char*);
 CFlagStatus cflag_string (const CFlag*, const char*);
 CFlagStatus cflag_help   (const CFlag*, const char*);
 

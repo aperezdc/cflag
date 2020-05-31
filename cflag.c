@@ -247,6 +247,16 @@ cflag_int(const CFlag *spec,
 }
 
 CFlagStatus
+cflag_uint(const CFlag *spec,
+           const char  *arg)
+{
+    if (!spec)
+        return CFLAG_NEEDS_ARG;
+
+    return (sscanf(arg, "%u", (unsigned*) spec->data) == 1) ? CFLAG_OK : CFLAG_BAD_FORMAT;
+}
+
+CFlagStatus
 cflag_string(const CFlag *spec,
              const char  *arg)
 {
