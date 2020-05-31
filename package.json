@@ -1,0 +1,9 @@
+{
+	"name": "cflag",
+	"version": "0.1.0",
+	"repo": "aperezdc/cflag",
+	"description": "Non-allocating command line flag parser",
+	"license": "MIT",
+	"keywords": ["cli", "flag", "options", "parser"],
+	"src": ["cflag.h", "cflag.c"]
+}
