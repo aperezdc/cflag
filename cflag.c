@@ -7,6 +7,8 @@
 #include "cflag.h"
 
 #include <assert.h>
+#include <errno.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
@@ -266,6 +268,30 @@ cflag_string(const CFlag *spec,
         return CFLAG_NEEDS_ARG;
 
     *((const char**) spec->data) = arg;
+    return CFLAG_OK;
+}
+
+CFlagStatus
+cflag_bytes(const CFlag *spec, const char *arg)
+{
+    if (!spec)
+        return CFLAG_NEEDS_ARG;
+
+    char *endpos;
+    unsigned long long v = strtoull(arg, &endpos, 0);
+    if (v == ULLONG_MAX && errno == ERANGE)
+        return CFLAG_BAD_FORMAT;
+
+    if (endpos) {
+        switch (*endpos) {
+            case 'g': case 'G': v *= 1024 * 1024 * 1024; break; /* gigabytes */
+            case 'm': case 'M': v *= 1024 * 1024;        break; /* megabytes */
+            case 'k': case 'K': v *= 1024;               break; /* kilobytes */
+            case 'b': case 'B': case '\0':               break; /* bytes     */
+        }
+    }
+
+    *((size_t*) spec->data) = v;
     return CFLAG_OK;
 }
 
