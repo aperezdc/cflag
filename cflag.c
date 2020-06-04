@@ -296,6 +296,35 @@ cflag_bytes(const CFlag *spec, const char *arg)
 }
 
 CFlagStatus
+cflag_timei(const CFlag *spec, const char *arg)
+{
+    if (!spec)
+        return CFLAG_NEEDS_ARG;
+
+    char *endpos;
+    unsigned long long v = strtoull(arg, &endpos, 0);
+
+    if (v == ULLONG_MAX && errno == ERANGE)
+        return CFLAG_BAD_FORMAT;
+
+    if (endpos) {
+        switch (*endpos) {
+            case 'y': v *= 60 * 60 * 24 * 365; break; /* years   */
+            case 'M': v *= 60 * 60 * 24 * 30;  break; /* months  */
+            case 'w': v *= 60 * 60 * 24 * 7;   break; /* weeks   */
+            case 'd': v *= 60 * 60 * 24;       break; /* days    */
+            case 'h': v *= 60 * 60;            break; /* hours   */
+            case 'm': v *= 60;                 break; /* minutes */
+            case 's': case '\0':               break; /* seconds */
+            default : return CFLAG_BAD_FORMAT;
+        }
+    }
+
+    *((unsigned long long*) spec->data) = v;
+    return CFLAG_OK;
+}
+
+CFlagStatus
 cflag_help(const CFlag *spec,
            const char  *arg)
 {
