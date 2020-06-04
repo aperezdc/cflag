@@ -1,6 +1,6 @@
 {
 	"name": "cflag",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"repo": "aperezdc/cflag",
 	"description": "Non-allocating command line flag parser",
 	"license": "MIT",
