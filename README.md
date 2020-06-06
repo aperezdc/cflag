@@ -7,7 +7,7 @@ Installation
 With [clib](https://github.com/clibs/clib):
 
 ```sh
-clib install cflag
+clib install aperezdc/cflag
 ```
 
 Example
