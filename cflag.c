@@ -32,9 +32,9 @@ is_negated(const char *s)
     return strncmp("--no-", s, 5) == 0;
 }
 
-static const CFlag*
-find_short(const CFlag specs[],
-           int         letter)
+static const struct cflag*
+find_short(const struct cflag specs[],
+           int                letter)
 {
     for (unsigned i = 0; specs[i].name != NULL || specs[i].letter != '\0'; ++i) {
         if (specs[i].letter == '\0')
@@ -45,9 +45,9 @@ find_short(const CFlag specs[],
     return NULL;
 }
 
-static const CFlag*
-find_long(const CFlag specs[],
-          const char *name)
+static const struct cflag*
+find_long(const struct cflag specs[],
+          const char        *name)
 {
     for (unsigned i = 0; specs[i].name != NULL || specs[i].letter != '\0'; ++i) {
         if (!specs[i].name)
@@ -59,16 +59,16 @@ find_long(const CFlag specs[],
 }
 
 static inline bool
-needs_arg(const CFlag *spec)
+needs_arg(const struct cflag *spec)
 {
     return (*spec->func)(NULL, NULL) == CFLAG_NEEDS_ARG;
 }
 
 void
-cflag_usage(const CFlag specs[],
-            const char *progname,
-            const char *usage,
-            FILE       *out)
+cflag_usage(const struct cflag specs[],
+            const char        *progname,
+            const char        *usage,
+            FILE              *out)
 {
     assert(specs);
     assert(progname);
@@ -86,7 +86,7 @@ cflag_usage(const CFlag specs[],
     fprintf(out, "Command line options:\n\n");
 
     for (unsigned i = 0;; ++i) {
-        const CFlag *spec = &specs[i];
+        const struct cflag *spec = &specs[i];
 
         const bool has_letter = spec->letter != '\0';
         const bool has_name = spec->name != NULL;
@@ -109,9 +109,9 @@ cflag_usage(const CFlag specs[],
 }
 
 int
-cflag_parse(const CFlag specs[],
-            int        *pargc,
-            char     ***pargv)
+cflag_parse(const struct cflag specs[],
+            int               *pargc,
+            char            ***pargv)
 {
     assert(specs);
     assert(pargc);
@@ -124,7 +124,7 @@ cflag_parse(const CFlag specs[],
         const char *arg = *argv;
 
         bool negated = false;
-        const CFlag *spec;
+        const struct cflag *spec;
         if (is_short_flag(arg)) {
             if (arg[1] == '-') /* -- stop processing command line flags */
                 break;
@@ -132,7 +132,7 @@ cflag_parse(const CFlag specs[],
         } else if (is_long_flag(arg)) {
             spec = find_long(specs, &arg[2]);
             if (!spec && is_negated(arg)) {
-                const CFlag *negspec = find_long(specs, &arg[5]);
+                const struct cflag *negspec = find_long(specs, &arg[5]);
                 if (negspec->func == cflag_bool) {
                     spec = negspec;
                     negated = true;
@@ -158,7 +158,7 @@ cflag_parse(const CFlag specs[],
             --argc;
         }
 
-        const CFlagStatus status = (*spec->func)(spec, arg);
+        const enum cflag_status status = (*spec->func)(spec, arg);
         if (status != CFLAG_OK) {
             *pargc = argc; *pargv = argv;
             return status;
@@ -177,7 +177,7 @@ cflag_parse(const CFlag specs[],
 }
 
 const char*
-cflag_status_name(CFlagStatus value)
+cflag_status_name(enum cflag_status value)
 {
     switch (value) {
         case CFLAG_OK: return "success";
@@ -191,10 +191,10 @@ cflag_status_name(CFlagStatus value)
 }
 
 const char*
-cflag_apply(const CFlag specs[],
-            const char *syntax,
-            int        *pargc,
-            char     ***pargv)
+cflag_apply(const struct cflag specs[],
+            const char        *syntax,
+            int               *pargc,
+            char            ***pargv)
 {
     assert(specs);
     assert(syntax);
@@ -210,7 +210,7 @@ cflag_apply(const CFlag specs[],
         if (slash) argv0 = slash + 1;
     }
 
-    const CFlagStatus status = cflag_parse(specs, &argc, &argv);
+    const enum cflag_status status = cflag_parse(specs, &argc, &argv);
     switch (status) {
         case CFLAG_SHOW_HELP:
             cflag_usage(specs, argv0, syntax, stdout);
@@ -227,9 +227,9 @@ cflag_apply(const CFlag specs[],
     exit(EXIT_FAILURE);
 }
 
-CFlagStatus
-cflag_bool(const CFlag *spec,
-           const char  *arg)
+enum cflag_status
+cflag_bool(const struct cflag *spec,
+           const char         *arg)
 {
     (void) arg;
 
@@ -240,9 +240,9 @@ cflag_bool(const CFlag *spec,
     return CFLAG_OK;
 }
 
-CFlagStatus
-cflag_int(const CFlag *spec,
-          const char  *arg)
+enum cflag_status
+cflag_int(const struct cflag *spec,
+          const char         *arg)
 {
     if (!spec)
         return CFLAG_NEEDS_ARG;
@@ -250,9 +250,9 @@ cflag_int(const CFlag *spec,
     return (sscanf(arg, "%d", (int*) spec->data) == 1) ? CFLAG_OK : CFLAG_BAD_FORMAT;
 }
 
-CFlagStatus
-cflag_uint(const CFlag *spec,
-           const char  *arg)
+enum cflag_status
+cflag_uint(const struct cflag *spec,
+           const char         *arg)
 {
     if (!spec)
         return CFLAG_NEEDS_ARG;
@@ -260,9 +260,9 @@ cflag_uint(const CFlag *spec,
     return (sscanf(arg, "%u", (unsigned*) spec->data) == 1) ? CFLAG_OK : CFLAG_BAD_FORMAT;
 }
 
-CFlagStatus
-cflag_string(const CFlag *spec,
-             const char  *arg)
+enum cflag_status
+cflag_string(const struct cflag *spec,
+             const char         *arg)
 {
     if (!spec)
         return CFLAG_NEEDS_ARG;
@@ -271,8 +271,9 @@ cflag_string(const CFlag *spec,
     return CFLAG_OK;
 }
 
-CFlagStatus
-cflag_bytes(const CFlag *spec, const char *arg)
+enum cflag_status
+cflag_bytes(const struct cflag *spec,
+            const char         *arg)
 {
     if (!spec)
         return CFLAG_NEEDS_ARG;
@@ -295,8 +296,9 @@ cflag_bytes(const CFlag *spec, const char *arg)
     return CFLAG_OK;
 }
 
-CFlagStatus
-cflag_timei(const CFlag *spec, const char *arg)
+enum cflag_status
+cflag_timei(const struct cflag *spec,
+            const char         *arg)
 {
     if (!spec)
         return CFLAG_NEEDS_ARG;
@@ -324,9 +326,9 @@ cflag_timei(const CFlag *spec, const char *arg)
     return CFLAG_OK;
 }
 
-CFlagStatus
-cflag_help(const CFlag *spec,
-           const char  *arg)
+enum cflag_status
+cflag_help(const struct cflag *spec,
+           const char         *arg)
 {
     (void) spec;
     (void) arg;

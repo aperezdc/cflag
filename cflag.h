@@ -10,28 +10,28 @@
 
 #include <stdio.h>
 
-typedef enum {
+enum cflag_type {
     CFLAG_TYPE_BOOL = 0,
     CFLAG_TYPE_INT,
     CFLAG_TYPE_STRING,
     CFLAG_TYPE_CUSTOM,
     CFLAG_TYPE_HELP,
-} CFlagType;
+};
 
-typedef enum {
+enum cflag_status {
     CFLAG_OK = 0,
     CFLAG_SHOW_HELP,
     CFLAG_UNDEFINED,
     CFLAG_BAD_FORMAT,
     CFLAG_NEEDS_ARG,
-} CFlagStatus;
+};
 
-typedef struct _CFlag CFlag;
+struct cflag;
 
-typedef CFlagStatus (*CFlagFunc) (const CFlag*, const char *arg);
+typedef enum cflag_status (*cflag_func) (const struct cflag*, const char *arg);
 
-struct _CFlag {
-    CFlagFunc   func;
+struct cflag {
+    cflag_func  func;
     const char *name;
     int         letter;
     void       *data;
@@ -40,7 +40,7 @@ struct _CFlag {
 
 
 #define CFLAG(_t, _name, _letter, _data, _help) \
-    ((CFlag) {                                  \
+    ((struct cflag) {                           \
         .func = cflag_ ## _t,                   \
         .name = (_name),                        \
         .letter = (_letter),                    \
@@ -52,28 +52,28 @@ struct _CFlag {
 #define CFLAG_END \
     { NULL, }
 
-CFlagStatus cflag_bool   (const CFlag*, const char*);
-CFlagStatus cflag_int    (const CFlag*, const char*);
-CFlagStatus cflag_uint   (const CFlag*, const char*);
-CFlagStatus cflag_string (const CFlag*, const char*);
-CFlagStatus cflag_bytes  (const CFlag*, const char*);
-CFlagStatus cflag_timei  (const CFlag*, const char*);
-CFlagStatus cflag_help   (const CFlag*, const char*);
+enum cflag_status cflag_bool   (const struct cflag*, const char*);
+enum cflag_status cflag_int    (const struct cflag*, const char*);
+enum cflag_status cflag_uint   (const struct cflag*, const char*);
+enum cflag_status cflag_string (const struct cflag*, const char*);
+enum cflag_status cflag_bytes  (const struct cflag*, const char*);
+enum cflag_status cflag_timei  (const struct cflag*, const char*);
+enum cflag_status cflag_help   (const struct cflag*, const char*);
 
-void cflag_usage(const CFlag specs[],
-                 const char *progname,
-                 const char *syntax,
-                 FILE       *out);
+void cflag_usage(const struct cflag specs[],
+                 const char        *progname,
+                 const char        *syntax,
+                 FILE              *out);
 
-int  cflag_parse(const CFlag specs[],
-                 int        *pargc,
-                 char     ***pargv);
+int  cflag_parse(const struct cflag specs[],
+                 int               *pargc,
+                 char            ***pargv);
 
-const char* cflag_apply(const CFlag specs[],
-                        const char *syntax,
-                        int        *pargc,
-                        char     ***pargv);
+const char* cflag_apply(const struct cflag specs[],
+                        const char        *syntax,
+                        int               *pargc,
+                        char            ***pargv);
 
-const char* cflag_status_name(CFlagStatus value);
+const char* cflag_status_name(enum cflag_status value);
 
 #endif /* !CFLAG_H */
