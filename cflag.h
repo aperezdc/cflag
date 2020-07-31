@@ -50,7 +50,7 @@ struct cflag {
 #define CFLAG_HELP \
     CFLAG(help, "help", 'h', NULL, "Prints command line usage help.")
 #define CFLAG_END \
-    { NULL, }
+    { .name = NULL, .letter = '\0' }
 
 enum cflag_status cflag_bool   (const struct cflag*, const char*);
 enum cflag_status cflag_int    (const struct cflag*, const char*);
