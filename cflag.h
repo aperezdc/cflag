@@ -55,6 +55,8 @@ struct cflag {
 enum cflag_status cflag_bool   (const struct cflag*, const char*);
 enum cflag_status cflag_int    (const struct cflag*, const char*);
 enum cflag_status cflag_uint   (const struct cflag*, const char*);
+enum cflag_status cflag_float  (const struct cflag*, const char*);
+enum cflag_status cflag_double (const struct cflag*, const char*);
 enum cflag_status cflag_string (const struct cflag*, const char*);
 enum cflag_status cflag_bytes  (const struct cflag*, const char*);
 enum cflag_status cflag_timei  (const struct cflag*, const char*);

@@ -261,6 +261,38 @@ cflag_uint(const struct cflag *spec,
 }
 
 enum cflag_status
+cflag_float(const struct cflag *spec,
+            const char         *arg)
+{
+    if (!spec)
+        return CFLAG_NEEDS_ARG;
+
+    char *endptr;
+    float v = strtof(arg, &endptr);
+    if (errno == ERANGE || *endptr != '\0')
+        return CFLAG_BAD_FORMAT;
+
+    *((float*) spec->data) = v;
+    return CFLAG_OK;
+}
+
+enum cflag_status
+cflag_double(const struct cflag *spec,
+             const char         *arg)
+{
+    if (!spec)
+        return CFLAG_NEEDS_ARG;
+
+    char *endptr;
+    double v = strtod(arg, &endptr);
+    if (errno == ERANGE || *endptr != '\0')
+        return CFLAG_BAD_FORMAT;
+
+    *((double*) spec->data) = v;
+    return CFLAG_OK;
+}
+
+enum cflag_status
 cflag_string(const struct cflag *spec,
              const char         *arg)
 {
