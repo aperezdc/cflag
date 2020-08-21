@@ -13,6 +13,54 @@
 #include <string.h>
 #include <stdlib.h>
 
+#if defined(linux) || defined(__linux) || defined(__linux__) || \
+    defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__)
+# define HAVE_TIOCGWINZS 1
+# include <sys/ioctl.h>
+#else
+# define HAVE_TIOCGWINZS 0
+#endif
+
+static unsigned
+term_columns(FILE *f)
+{
+#if HAVE_TIOCGWINZS
+    struct winsize ws;
+    int fd = fileno(f);
+    if (fd >= 0 && ioctl(fd, TIOCGWINSZ, &ws) == 0)
+        return ws.ws_col;
+#endif /* HAVE_TIOCGWINZS */
+
+    return 80;
+}
+
+static bool
+findent(FILE *out, unsigned rcol, const char *text)
+{
+    if (rcol < 20)
+        return false;
+
+    if (!(text && *text))
+        return true;
+
+    fputs("   ", out);
+    for (unsigned col = 3; text && *text;) {
+        const char *spc = strchr(text, ' ');
+        const size_t len = spc ? (++spc - text) : strlen(text);
+
+        if (col + len > rcol) {
+            /* Move over to the next line. */
+            fputc('\n', out);
+            return findent(out, rcol, text);
+        }
+
+        fwrite(text, sizeof(char), len, out);
+        col += len;
+        text = spc;
+    }
+
+    return true;
+}
 
 static inline bool
 is_long_flag(const char *s)
@@ -82,6 +130,8 @@ cflag_usage(const struct cflag specs[],
             progname = slash + 1;
     }
 
+    const unsigned rcol = term_columns(out) - 3;
+
     fprintf(out, "Usage: %s %s\n", progname, usage);
     fprintf(out, "Command line options:\n\n");
 
@@ -104,7 +154,13 @@ cflag_usage(const struct cflag specs[],
         if (needs_arg(spec))
             fprintf(out, " <ARG>");
 
-        fprintf(out, "\n   %s\n\n", spec->help);
+        fputc('\n', out);
+        if (!findent(out, rcol, spec->help)) {
+            fputs("   ", out);
+            fputs(spec->help, out);
+        }
+        fputc('\n', out);
+        fputc('\n', out);
     }
 }
 
