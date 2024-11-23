@@ -24,7 +24,7 @@ main(int argc, char **argv)
     bool verbose = false;
     const char *url = "https://perezdecastro.org";
 
-    static const struct cflag options[] = {
+    const struct cflag options[] = {
         CFLAG(int, "requests", 'r', &requests,
             "Number of total requests"),
         CFLAG(int, "concurrency", 0 /* no short option */, &concurrency,
@@ -37,7 +37,7 @@ main(int argc, char **argv)
         CFLAG_END
     };
 
-    cflag_apply("[options] --url URL", &argc, &argv);
+    cflag_apply(options, "[options] --url URL", &argc, &argv);
 
     return EXIT_SUCCESS;
 }
