@@ -2,7 +2,7 @@
  * cflag.h
  * Copyright (C) 2020 Adrian Perez de Castro <aperez@igalia.com>
  *
- * Distributed under terms of the MIT license.
+ * SPDX-License-Identifier: MIT
  */
 
 #ifndef CFLAG_H
