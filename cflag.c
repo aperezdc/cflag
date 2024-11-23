@@ -1,8 +1,10 @@
 /* cflag.c
- * Copyright (C) 2020 Adrian Perez de Castro <aperez@igalia.com>
+ * Copyright (C) 2020-2024 Adrian Perez de Castro <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
+
+#define _POSIX_C_SOURCE 199309L
 
 #include "cflag.h"
 
